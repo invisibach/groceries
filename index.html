@@ -1,0 +1,26 @@
+<html>
+
+    <head>
+        <script type="text/javascript" src="./modules/papaparse/papaparse.min.js"></script>
+    </head>
+    <style>
+
+    </style>
+
+    <body>
+        <script>
+            function init() {
+                Papa.parse('https://docs.google.com/spreadsheets/d/e/2PACX-1vS7rW-SfDDquABsjSutO8YlDOzyM8kTgSVkuAGbXZ6j1JpsFUaUgBaxgrS8BV80_xG-oVb1t9p5Bcq5/pub?output=csv', {
+                    download: true,
+                    header: true,
+                    complete: function(results) {
+                        var data = results.data
+                        console.log(data)
+                    }
+                })
+            }
+            window.addEventListener('DOMContentLoaded', init)
+        </script>
+    </body>
+
+</html>
