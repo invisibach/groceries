@@ -1,26 +1,222 @@
 <html>
 
     <head>
+        <link type="text/css" rel="stylesheet" href="./groceries.css" />
+        <link type="text/css" rel="stylesheet" href="./modules/jqwidgets-9.1.4/styles/jqx.base.css" />
         <script type="text/javascript" src="./modules/papaparse/papaparse.min.js"></script>
+        <script type="text/javascript" src="./modules/jquery/jquery-3.6.0.min.js"></script>
+        <script src="./modules/jqwidgets-9.1.4/jqx-all.js"></script>
+        <script src="./modules/jqwidgets-9.1.4/demos.js"></script>
     </head>
-    <style>
 
-    </style>
 
-    <body>
-        <script>
-            function init() {
-                Papa.parse('https://docs.google.com/spreadsheets/d/e/2PACX-1vS7rW-SfDDquABsjSutO8YlDOzyM8kTgSVkuAGbXZ6j1JpsFUaUgBaxgrS8BV80_xG-oVb1t9p5Bcq5/pub?output=csv', {
-                    download: true,
-                    header: true,
-                    complete: function(results) {
-                        var data = results.data
-                        console.log(data)
+    <script>
+        let recipes = {}
+        let ingredients = {}
+        function initDatabase(_callback) {
+            Papa.parse('https://docs.google.com/spreadsheets/d/e/2PACX-1vS7rW-SfDDquABsjSutO8YlDOzyM8kTgSVkuAGbXZ6j1JpsFUaUgBaxgrS8BV80_xG-oVb1t9p5Bcq5/pub?output=csv', {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    var recipelines = results.data
+
+                    for (var r=0; r<recipelines.length; r++){
+                        //split recipes from ingredients
+                        if(recipelines[r].ingredients !== ""){
+                            if (recipelines[r].dish !== ""){
+                                recipes[recipelines[r].dish] = {
+                                    "cuisine": recipelines[r].cuisine,
+                                    "time": recipelines[r].time,
+                                    "meal": recipelines[r].meal.split(","),
+                                    "ingredients": new Array()
+                                }
+                            } else {
+                                recipelines[r].dish = recipelines[r-1].dish
+                            }
+                            recipes[recipelines[r].dish]['ingredients'].push(
+                                {
+                                    "ingredient": recipelines[r].ingredients,
+                                    "quantity": recipelines[r].quantity
+                                }
+                            )
+                        }
+                        if(recipelines[r]['ingredient-name'] !== ""){
+                            ingredients[recipelines[r]['ingredient-name']] = {
+                                "type": recipelines[r].type,
+                                "measurement": recipelines[r].measurement,
+                                "store": recipelines[r].store,
+                                "isle": recipelines[r].isle,
+                                "have": recipelines[r].have
+                            }
+                        }
                     }
-                })
-            }
-            window.addEventListener('DOMContentLoaded', init)
-        </script>
-    </body>
+                _callback()
+                }
+            })
+        }
+        
+        function findByMatchingProperties(set, properties) {
+            return set.filter(function (entry) {
+                return Object.keys(properties).every(function (key) {
+                    return entry[key] === properties[key];
+                });
+            });
+        }
+
+        
+        $(document).ready(function () {
+            initDatabase(function() {
+
+                var protein = []
+                for (var i in ingredients){
+                    console.log(ingredients[i])
+                    if (ingredients[i].type == "protein"){
+                        protein.push({
+                            id: protein.length,
+                            name: ingredients[i].type,
+                            image: "./images/" + ingredients[i].type
+                        })
+                    }
+                }
+                var protein = [
+                    { id: 0, name: "No name", image: "./images/common.png", common: true },
+                    { id: 1, name: "Andrew Fuller", image: "./images/common.png" },
+                    { id: 2, name: "Janet Leverling", image: "./images/common.png" },
+                    { id: 3, name: "Steven Buchanan", image: "./images/common.png" }
+                ];
+    
+                // build cuisinecolumns from spreadsheet database                
+                var cuisineColumns = []
+                for (var r in recipes){
+                    if (findByMatchingProperties(cuisineColumns, {text: recipes[r].cuisine}) < 1){
+                        cuisineColumns.push({
+                            text: recipes[r].cuisine,
+                            dataField: recipes[r].cuisine,
+                            access: "none",
+                            maxItems: 5
+                        })
+                    }
+                }
+    
+                var dayColumns = [
+                        { text: "Sunday", dataField: "sun", access: "none", maxItems: 5 },
+                        { text: "Monday", dataField: "mon", access: "none", maxItems: 5 },
+                        { text: "Tuesday", dataField: "tue", access: "none", maxItems: 5 },
+                        { text: "Wednesday", dataField: "wed", access: "none", maxItems: 5 },
+                        { text: "Thursday", dataField: "thu", access: "none", maxItems: 5 },
+                        { text: "Friday", dataField: "fri", access: "none", maxItems: 5 },
+                        { text: "Saturday", dataField: "sat", access: "none", maxItems: 5 }
+                ];
+                var dayColumns = [
+                        { text: "Sunday", dataField: "sun", access: "none", maxItems: 5 },
+                        { text: "Monday", dataField: "mon", access: "none", maxItems: 5 },
+                        { text: "Tuesday", dataField: "tue", access: "none", maxItems: 5 },
+                        { text: "Wednesday", dataField: "wed", access: "none", maxItems: 5 },
+                        { text: "Thursday", dataField: "thu", access: "none", maxItems: 5 },
+                        { text: "Friday", dataField: "fri", access: "none", maxItems: 5 },
+                        { text: "Saturday", dataField: "sat", access: "none", maxItems: 5 }
+                ];
+                
+                //build meals from speadsheet database
+                var allMealsSource = []
+                var recipenames = Object.keys(recipes)
+                for (var r=0; r< recipenames.length; r++){
+                    allMealsSource.push({
+                        id: r,
+                        status: recipes[recipenames[r]].cuisine,
+                        text: recipenames[r],
+                        tags: recipes[recipenames[r]].meal.join(),
+                        color: "#5dc3f0",
+                        resourceID: 0
+                    })
+                }
+
+                var kanbanSourceConnected2 = [];
+                var kanbanSourceConnected3 = [];
+                var kanbanSourceConnected4 = [];
+                var kanbanSourceConnected5 = [];
+                var kanbanSourceConnected6 = [];
+    
+    
+                $('#allMeals_kanban').jqxKanban({
+                        width: 'calc(100% - 4px)',
+                        height: 400,
+                        source: allMealsSource,
+                        connectWith: "#dinner_kanban, #lunch_kanban, #p_breakfast_kanban, #p_snack_kanban, #p_lunch_kanban",
+                        columns: cuisineColumns,
+                        resources: protein
+                });
+                $('#dinner_kanban').jqxKanban({
+                        width: 'calc(100% - 4px)',
+                        height: 200,
+                        source: kanbanSourceConnected2,
+                        connectWith: "#allMeals_kanban, #lunch_kanban, #p_breakfast_kanban, #p_snack_kanban, #p_lunch_kanban",
+                        columns: dayColumns,
+                        resources: protein
+                });
+                $('#lunch_kanban').jqxKanban({
+                        width: 'calc(100% - 4px)',
+                        height: 200,
+                        source: kanbanSourceConnected3,
+                        connectWith: "#allMeals_kanban, #dinner_kanban, #p_breakfast_kanban, #p_snack_kanban, #p_lunch_kanban",
+                        columns: dayColumns,
+                        resources: protein
+                });
+                $('#p_breakfast_kanban').jqxKanban({
+                        width: 'calc(100% - 4px)',
+                        height: 100,
+                        source: kanbanSourceConnected3,
+                        connectWith: "#allMeals_kanban, #dinner_kanban, #lunch_kanban, #p_snack_kanban, #p_lunch_kanban",
+                        columns: dayColumns,
+                        resources: protein
+                });
+                $('#p_snack_kanban').jqxKanban({
+                        width: 'calc(100% - 4px)',
+                        height: 70,
+                        source: kanbanSourceConnected3,
+                        connectWith: "#allMeals_kanban, #dinner_kanban, #lunch_kanban, #p_breakfast_kanban, #p_lunch_kanban",
+                        columns: dayColumns,
+                        resources: protein,
+                        headerHeight: 0
+                    });
+                    $('#p_lunch_kanban').jqxKanban({
+                        width: 'calc(100% - 4px)',
+                        height: 70,
+                        source: kanbanSourceConnected3,
+                        connectWith: "#allMeals_kanban, #dinner_kanban, #lunch_kanban, #p_breakfast_kanban, #p_snack_kanban",
+                        columns: dayColumns,
+                        resources: protein,
+                        headerHeight: 0
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div id="outerBox1">
+        <div id="kanbanBox1">
+            <div id="allMeals_kanban"></div>
+        </div>
+    </div>
+    <div id="outerBox2">
+        <div id="kanbanBox2">
+            <div id="dinner_kanban"></div>
+        </div>
+    </div>
+    <div id="outerBox2">
+        <div id="kanbanBox2">
+            <div id="lunch_kanban"></div>
+        </div>
+    </div>
+    <div class="clearing"></div>
+    <div id="outerBox2">
+        <div id="kanbanBox2">
+            <div id="p_breakfast_kanban"></div>
+            <div id="p_snack_kanban"></div>
+            <div id="p_lunch_kanban"></div>
+        </div>
+    </div>
+    <div class="clearing"></div>
+</body>
 
 </html>
