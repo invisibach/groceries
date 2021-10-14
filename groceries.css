@@ -1,20 +1,13 @@
-#outerBox1 {
-    float: left;
-    padding: 4px;
-    margin: 2px;
-    background-color: #a53cd6;
-    color: #fff;
-    width: 98%
+/* #p_breakfast_kanban-column-container-0 {
+    background-color: #afadad;
 }
+#p_lunch_kanban-column-container-0 {
+    background-color: #afadad;
+}
+#p_snack_kanban-column-container-0 {
+    background-color: #afadad;
+} */
 
-#outerBox2 {
-    color: #fff;
-    float: left;
-    padding: 4px;
-    margin: 2px;
-    background-color: #2d7a85;
-    width: 98%
-}
 
 
 .jqx-kanban-item-color-status {
