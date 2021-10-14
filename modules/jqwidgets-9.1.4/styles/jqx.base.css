@@ -6697,8 +6697,8 @@ ol li .jqx-listmenu-item-label:before {
 
 .jqx-kanban-item {
     margin: 2px;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    /* padding-top: 5px;
+    padding-bottom: 5px; */
     border-width: 1px;
     border-style: solid;
     border-color: inherit;
@@ -6730,7 +6730,7 @@ ol li .jqx-listmenu-item-label:before {
     padding-left: 6px;
     padding-right: 23px;
     font-size: 14px;
-    padding-bottom: 5px;
+    padding-bottom: 11px;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -6754,7 +6754,7 @@ ol li .jqx-listmenu-item-label:before {
     height: 22px;
     position: absolute;
     right: 3px;
-    top: 3px;
+    top: 1px;
     background: #eee;
     text-align: center;
     overflow: hidden;

@@ -1,31 +1,67 @@
-#kanbanBox1 {
-    width: 100%;
-    /* height: 400px; */
-    float: left;
-    padding: 2px;
-}
-
-#kanbanBox2 {
-    width: 100%;
-    /* height: 400px; */
-    float: left;
-    padding: 2px;
-}
-
 #outerBox1 {
     float: left;
-    padding: 5px;
+    padding: 4px;
     margin: 2px;
-    background-color: #6bbd49;
+    background-color: #a53cd6;
     color: #fff;
-    width: 90%
+    width: 98%
 }
 
 #outerBox2 {
     color: #fff;
     float: left;
-    padding: 5px;
+    padding: 4px;
     margin: 2px;
-    background-color: #5dc3f0;
-    width: 90%
+    background-color: #2d7a85;
+    width: 98%
 }
+
+
+.jqx-kanban-item-color-status {
+    width: 100%;
+    height: 25px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    position: relative;
+    margin-top: 0px;
+    top: 0px;
+}
+
+.jqx-kanban-item {
+    padding-top: 0px;
+}
+
+.jqx-kanban-item-text {
+    padding-top: 6px;
+}
+
+.jqx-kanban-item-avatar {
+    margin-top: 5px;
+    border: 1px solid black;
+}
+.jqx-kanban-item-leftover {
+    margin-top: 5px;
+    border: 1px solid black;
+}
+
+.jqx-kanban-template-icon {
+    position: absolute;
+    right: 3px;
+    top: 12px;
+}
+
+.icon-leftovers {
+    width: 16px;
+    height: 16px;
+    margin: 0 auto;
+    cursor: pointer;
+    background-image: url(images/close.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.jqx-widget-content-light {
+    background-color: #ffffff;
+    border-color: #c53030;
+}
+

@@ -12,7 +12,7 @@
 
     <script>
         let recipes = {}
-        let ingredients = {}
+        let ingredientsDict = {}
         function initDatabase(_callback) {
             Papa.parse('https://docs.google.com/spreadsheets/d/e/2PACX-1vS7rW-SfDDquABsjSutO8YlDOzyM8kTgSVkuAGbXZ6j1JpsFUaUgBaxgrS8BV80_xG-oVb1t9p5Bcq5/pub?output=csv', {
                 download: true,
@@ -36,13 +36,14 @@
                             recipes[recipelines[r].dish]['ingredients'].push(
                                 {
                                     "ingredient": recipelines[r].ingredients,
-                                    "quantity": recipelines[r].quantity
+                                    "quantity": parseFloat(recipelines[r].quantity)
                                 }
                             )
                         }
                         if(recipelines[r]['ingredient-name'] !== ""){
-                            ingredients[recipelines[r]['ingredient-name']] = {
+                            ingredientsDict[recipelines[r]['ingredient-name']] = {
                                 "type": recipelines[r].type,
+                                "protein": recipelines[r].protein,
                                 "measurement": recipelines[r].measurement,
                                 "store": recipelines[r].store,
                                 "isle": recipelines[r].isle,
@@ -63,71 +64,92 @@
             });
         }
 
+        function collectIngredientList(){
+            var mealplan = [].concat($("#lunch_kanban").jqxKanban('getItems'), $("#dinner_kanban").jqxKanban('getItems'), $("#p_breakfast_kanban").jqxKanban('getItems'), $("#p_snack_kanban").jqxKanban('getItems'), $("#p_lunch_kanban").jqxKanban('getItems'))
+            var mealnames = []
+            var mealIngredientsList = []
+            for (var m in mealplan){
+                mealnames.push(mealplan[m].text)
+            }
+            for (var n in mealnames){
+                for (var i in recipes[mealnames[n]].ingredients){
+                    var thisIngredient = recipes[mealnames[n]].ingredients[i]
+                    // check if ingredient already in list
+                    var index = mealIngredientsList.findIndex(function(ing) {
+                        return ing.ingredient == thisIngredient.ingredient
+                    });
+                    // increase quantity if already in list, add to list if not
+                    if (index > -1){
+                        mealIngredientsList[index].quantity += thisIngredient.quantity
+                    } else {
+                        thisIngredient.measurement = ingredientsDict[thisIngredient.ingredient].measurement
+                        thisIngredient.store = ingredientsDict[thisIngredient.ingredient].store,
+                        thisIngredient.isle = ingredientsDict[thisIngredient.ingredient].isle,
+                        thisIngredient.have = ingredientsDict[thisIngredient.ingredient].have
+                        mealIngredientsList.push(thisIngredient)
+                    }
+                }
+            }
+            return mealIngredientsList
+        }
         
         $(document).ready(function () {
             initDatabase(function() {
 
-                var protein = []
-                for (var i in ingredients){
-                    console.log(ingredients[i])
-                    if (ingredients[i].type == "protein"){
-                        protein.push({
-                            id: protein.length,
-                            name: ingredients[i].type,
-                            image: "./images/" + ingredients[i].type
-                        })
+                // var proteinArray = [{ id: 0, name: "Soylent Green", image: "./images/common.png", common: true }]
+                var proteinArray = []
+                for (var i in ingredientsDict){
+                    if (ingredientsDict[i].type == "meat"){
+                        if (findByMatchingProperties(proteinArray, {name: ingredientsDict[i].protein})){
+                            proteinArray.push({
+                                id: proteinArray.length,
+                                name: ingredientsDict[i].protein,
+                                image: "./images/" + ingredientsDict[i].protein + ".png"
+                            })
+                        }
                     }
                 }
-                var protein = [
-                    { id: 0, name: "No name", image: "./images/common.png", common: true },
-                    { id: 1, name: "Andrew Fuller", image: "./images/common.png" },
-                    { id: 2, name: "Janet Leverling", image: "./images/common.png" },
-                    { id: 3, name: "Steven Buchanan", image: "./images/common.png" }
-                ];
-    
                 // build cuisinecolumns from spreadsheet database                
                 var cuisineColumns = []
                 for (var r in recipes){
                     if (findByMatchingProperties(cuisineColumns, {text: recipes[r].cuisine}) < 1){
                         cuisineColumns.push({
                             text: recipes[r].cuisine,
-                            dataField: recipes[r].cuisine,
-                            access: "none",
-                            maxItems: 5
+                            dataField: recipes[r].cuisine
                         })
                     }
                 }
-    
+
                 var dayColumns = [
-                        { text: "Sunday", dataField: "sun", access: "none", maxItems: 5 },
-                        { text: "Monday", dataField: "mon", access: "none", maxItems: 5 },
-                        { text: "Tuesday", dataField: "tue", access: "none", maxItems: 5 },
-                        { text: "Wednesday", dataField: "wed", access: "none", maxItems: 5 },
-                        { text: "Thursday", dataField: "thu", access: "none", maxItems: 5 },
-                        { text: "Friday", dataField: "fri", access: "none", maxItems: 5 },
-                        { text: "Saturday", dataField: "sat", access: "none", maxItems: 5 }
+                    { text: "Sunday", dataField: "sun", maxItems: 3, collapsible: false },
+                    { text: "Monday", dataField: "mon", maxItems: 3, collapsible: false },
+                    { text: "Tuesday", dataField: "tue", maxItems: 3, collapsible: false },
+                    { text: "Wednesday", dataField: "wed", maxItems: 3, collapsible: false },
+                    { text: "Thursday", dataField: "thu", maxItems: 3, collapsible: false },
+                    { text: "Friday", dataField: "fri", maxItems: 3, collapsible: false },
+                    { text: "Saturday", dataField: "sat", maxItems: 3, collapsible: false }
                 ];
-                var dayColumns = [
-                        { text: "Sunday", dataField: "sun", access: "none", maxItems: 5 },
-                        { text: "Monday", dataField: "mon", access: "none", maxItems: 5 },
-                        { text: "Tuesday", dataField: "tue", access: "none", maxItems: 5 },
-                        { text: "Wednesday", dataField: "wed", access: "none", maxItems: 5 },
-                        { text: "Thursday", dataField: "thu", access: "none", maxItems: 5 },
-                        { text: "Friday", dataField: "fri", access: "none", maxItems: 5 },
-                        { text: "Saturday", dataField: "sat", access: "none", maxItems: 5 }
-                ];
-                
+            
                 //build meals from speadsheet database
                 var allMealsSource = []
                 var recipenames = Object.keys(recipes)
                 for (var r=0; r< recipenames.length; r++){
+                    // var proteinID = -1
+
+                    for(var i in recipes[recipenames[r]].ingredients){
+                        var proteinLookup  = findByMatchingProperties(proteinArray, {name:ingredientsDict[recipes[recipenames[r]].ingredients[i].ingredient].protein})
+                        if(proteinLookup.length > 0){
+                            proteinID = proteinLookup[0].id
+                        }
+                    }
+
                     allMealsSource.push({
                         id: r,
                         status: recipes[recipenames[r]].cuisine,
                         text: recipenames[r],
                         tags: recipes[recipenames[r]].meal.join(),
                         color: "#5dc3f0",
-                        resourceID: 0
+                        resourceId: proteinID
                     })
                 }
 
@@ -138,55 +160,100 @@
                 var kanbanSourceConnected6 = [];
     
     
+                var recipeTemplate = "<div class='jqx-kanban-item' id=''>"
+                        + "<div class='jqx-kanban-item-color-status'></div>"
+                        + "<div class='jqx-kanban-item-avatar'></div>"
+                        // + "<div class='jqx-icon jqx-icon-close jqx-kanban-item-template-content jqx-kanban-template-icon'></div>"
+                        + "<div class='jqx-kanban-item-text'></div>"
+                        + "<div style='display: none;' class='jqx-kanban-item-footer'></div>"
+                        + "</div>"
+
                 $('#allMeals_kanban').jqxKanban({
-                        width: 'calc(100% - 4px)',
-                        height: 400,
-                        source: allMealsSource,
-                        connectWith: "#dinner_kanban, #lunch_kanban, #p_breakfast_kanban, #p_snack_kanban, #p_lunch_kanban",
-                        columns: cuisineColumns,
-                        resources: protein
+                    itemRenderer: function(element, item, resource)
+                    {
+                        $(element).find(".jqx-kanban-item-text").css('background', item.color);
+                    },                    
+                    width: '60%',
+                    height: 400,
+                    template: recipeTemplate,
+                    source: allMealsSource,
+                    connectWith: "#dinner_kanban, #lunch_kanban, #p_breakfast_kanban, #p_snack_kanban, #p_lunch_kanban",
+                    columns: cuisineColumns,
+                    resources: proteinArray,
+                    headerHeight: 20
                 });
                 $('#dinner_kanban').jqxKanban({
-                        width: 'calc(100% - 4px)',
-                        height: 200,
-                        source: kanbanSourceConnected2,
-                        connectWith: "#allMeals_kanban, #lunch_kanban, #p_breakfast_kanban, #p_snack_kanban, #p_lunch_kanban",
-                        columns: dayColumns,
-                        resources: protein
+                    width: '100%',
+                    height: 155,
+                    template: recipeTemplate,
+                    source: kanbanSourceConnected2,
+                    connectWith: "#allMeals_kanban, #lunch_kanban, #p_breakfast_kanban, #p_snack_kanban, #p_lunch_kanban",
+                    columns: dayColumns,
+                    resources: proteinArray,
+                    headerHeight: 20
                 });
                 $('#lunch_kanban').jqxKanban({
-                        width: 'calc(100% - 4px)',
-                        height: 200,
-                        source: kanbanSourceConnected3,
-                        connectWith: "#allMeals_kanban, #dinner_kanban, #p_breakfast_kanban, #p_snack_kanban, #p_lunch_kanban",
-                        columns: dayColumns,
-                        resources: protein
+                    width: '100%',
+                    height: 155,
+                    template: recipeTemplate,
+                    source: kanbanSourceConnected3,
+                    connectWith: "#allMeals_kanban, #dinner_kanban, #p_breakfast_kanban, #p_snack_kanban, #p_lunch_kanban",
+                    columns: dayColumns,
+                    resources: proteinArray,
+                    headerHeight: 20
                 });
                 $('#p_breakfast_kanban').jqxKanban({
-                        width: 'calc(100% - 4px)',
-                        height: 100,
-                        source: kanbanSourceConnected3,
-                        connectWith: "#allMeals_kanban, #dinner_kanban, #lunch_kanban, #p_snack_kanban, #p_lunch_kanban",
-                        columns: dayColumns,
-                        resources: protein
+                    width: '100%',
+                    height: 72,
+                    template: recipeTemplate,
+                    source: kanbanSourceConnected3,
+                    connectWith: "#allMeals_kanban, #dinner_kanban, #lunch_kanban, #p_snack_kanban, #p_lunch_kanban",
+                    columns: dayColumns,
+                    resources: proteinArray,
+                    headerHeight: 20
                 });
                 $('#p_snack_kanban').jqxKanban({
-                        width: 'calc(100% - 4px)',
-                        height: 70,
-                        source: kanbanSourceConnected3,
-                        connectWith: "#allMeals_kanban, #dinner_kanban, #lunch_kanban, #p_breakfast_kanban, #p_lunch_kanban",
-                        columns: dayColumns,
-                        resources: protein,
-                        headerHeight: 0
+                    width: '100%',
+                    height: 52,
+                    template: recipeTemplate,
+                    source: kanbanSourceConnected3,
+                    connectWith: "#allMeals_kanban, #dinner_kanban, #lunch_kanban, #p_breakfast_kanban, #p_lunch_kanban",
+                    columns: dayColumns,
+                    resources: proteinArray,
+                    headerHeight: 0
+                });
+                $('#p_lunch_kanban').jqxKanban({
+                    width: '100%',
+                    height: 52,
+                    template: recipeTemplate,
+                    source: kanbanSourceConnected3,
+                    connectWith: "#allMeals_kanban, #dinner_kanban, #lunch_kanban, #p_breakfast_kanban, #p_snack_kanban",
+                    columns: dayColumns,
+                    resources: proteinArray,
+                    headerHeight: 0
+                });
+
+                $(document).ready(function () {
+                    $('#shoppingList').jqxEditor({
+                        width: "40%",
+                        height: $('#allMeals_kanban').jqxKanban('height'),
+                        tools: 'bold italic underline | font size | color background | left center right | outdent indent | ul ol | image | clean'
                     });
-                    $('#p_lunch_kanban').jqxKanban({
-                        width: 'calc(100% - 4px)',
-                        height: 70,
-                        source: kanbanSourceConnected3,
-                        connectWith: "#allMeals_kanban, #dinner_kanban, #lunch_kanban, #p_breakfast_kanban, #p_snack_kanban",
-                        columns: dayColumns,
-                        resources: protein,
-                        headerHeight: 0
+                });
+
+                //trigger on meal move
+                $("[id$=kanban]").on('itemMoved', function (event) {
+                   var currentIngredientList = JSON.stringify(collectIngredientList())
+                   $("#shoppingList").val(currentIngredientList)
+                });
+
+
+                //basis for leftover duplication
+                $('#allMeals_kanban').on("itemAttrClicked", function (event) {
+                    var args = event.args;
+                    if (args.attribute == "template") {
+                        $('#allMeals_kanban').jqxKanban('removeItem', args.item.id);
+                    }
                 });
             });
         });
@@ -194,27 +261,20 @@
 </head>
 <body>
     <div id="outerBox1">
-        <div id="kanbanBox1">
-            <div id="allMeals_kanban"></div>
-        </div>
+        <div id="allMeals_kanban" style="float:left"></div>
+        <textarea name="shoppingList" id="shoppingList" style="float: right"></textarea>
     </div>
     <div id="outerBox2">
-        <div id="kanbanBox2">
-            <div id="dinner_kanban"></div>
-        </div>
+        <div id="dinner_kanban"></div>
     </div>
     <div id="outerBox2">
-        <div id="kanbanBox2">
-            <div id="lunch_kanban"></div>
-        </div>
+        <div id="lunch_kanban"></div>
     </div>
     <div class="clearing"></div>
     <div id="outerBox2">
-        <div id="kanbanBox2">
-            <div id="p_breakfast_kanban"></div>
-            <div id="p_snack_kanban"></div>
-            <div id="p_lunch_kanban"></div>
-        </div>
+        <div id="p_breakfast_kanban"></div>
+        <div id="p_snack_kanban"></div>
+        <div id="p_lunch_kanban"></div>
     </div>
     <div class="clearing"></div>
 </body>
