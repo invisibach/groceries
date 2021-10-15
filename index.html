@@ -1,18 +1,59 @@
 <html>
 
     <head>
+        <Title>TY Meal Planner 2000</Title>
         <link type="text/css" rel="stylesheet" href="./groceries.css" />
         <link type="text/css" rel="stylesheet" href="./modules/jqwidgets-9.1.4/styles/jqx.base.css" />
         <script type="text/javascript" src="./modules/papaparse/papaparse.min.js"></script>
         <script type="text/javascript" src="./modules/jquery/jquery-3.6.0.min.js"></script>
         <script src="./modules/jqwidgets-9.1.4/jqx-all.js"></script>
         <script src="./modules/jqwidgets-9.1.4/demos.js"></script>
+        <script src="./modules/kendo/jszip.min.js"></script>
+        <script src="./modules/kendo/kendo.all.min.js"></script>
     </head>
 
 
 
 
     <script>
+        let colors = {
+            "red": "#F65A38",
+            "orange": "#F8961E",
+            "yellow":"#F9C74F",
+            "green": "#90BE6D",
+            "blue": "#43AA8B",
+            "purple": "#577590",
+            "white": "#eeeeee"
+        }
+
+        function getMealColor(dish){
+            var color = colors["white"]
+            var meals = dish.meal.replace(" ","").split(",")
+            console.log(meals)
+            if (meals.length == 1) {
+                if (meals.includes("breakfast")){
+                    color = colors["red"]
+                } else if (meals.includes("lunch")){
+                    color = colors["yellow"]
+                } else if (meals.includes("dinner")){
+                    color = colors["blue"]
+                }
+            } else if (meals.length == 2){
+                if (meals.includes("breakfast") && meals.includes("lunch")){
+                    color = colors["orange"]
+                }
+                if (meals.includes("lunch") && meals.includes("dinner")){
+                    color = colors["green"]
+                }
+                if (meals.includes("breakfast") && meals.includes("dinner")){
+                    color = colors["purple"]
+                }
+            }
+
+
+            return color
+        }
+
         let recipes = {}
         let ingredientsDict = {}
         function initDatabase(_callback) {
@@ -30,7 +71,8 @@
                                     "cuisine": recipelines[r].cuisine,
                                     "time": recipelines[r].time,
                                     "meal": recipelines[r].meal.split(","),
-                                    "ingredients": new Array()
+                                    "ingredients": new Array(),
+                                    "color": getMealColor(recipelines[r])
                                 }
                             } else {
                                 recipelines[r].dish = recipelines[r-1].dish
@@ -99,25 +141,29 @@
 
         function textFormat(list){
             var formattedDict = {}
+            var checkSupply = []
             for(var i in list){
-                if(list[i].store in formattedDict){
-                    if (list[i].isle in formattedDict[list[i].store]){
-                        formattedDict[list[i].store][list[i].isle].push(list[i])
+                if (list[i].have !== ""){
+                    checkSupply.push(list[i])
+                } else {
+                    if(list[i].store in formattedDict){
+                        if (list[i].isle in formattedDict[list[i].store]){
+                            formattedDict[list[i].store][list[i].isle].push(list[i])
+                        } else {
+                            formattedDict[list[i].store][list[i].isle] = [list[i]]
+                        }
                     } else {
+                        formattedDict[list[i].store] = {}
                         formattedDict[list[i].store][list[i].isle] = [list[i]]
                     }
-                } else {
-                    formattedDict[list[i].store] = {}
-                    formattedDict[list[i].store][list[i].isle] = [list[i]]
                 }
             }
             
-            console.log("🚀 ~ file: index.html ~ line 102 ~ textFormat ~ formattedDict", formattedDict)
             
             var formattedString = ""
             for (var s in formattedDict){
                 //add store name
-                formattedString += "<div style='text-align: left;''><span style='font-weight: bold; font-size: medium;'>" + s + "</span></div><ul>"
+                formattedString += "<div style='text-align: left;''><span style='font-weight: bold; font-size: medium;'>" + s + ":</span></div><ul>"
                 for (var i in formattedDict[s]){
                     //add isle name
                     formattedString += "<li>" + i + "<br></li><ul>"
@@ -130,18 +176,46 @@
                 }
                 formattedString += "</ul><div><br></div>"
             }
+            //append supply check items
+            formattedString += "<div style='text-align: left;''><span style='font-weight: bold; font-size: medium;'>Check Existing Supply:</span></div><ul>"
+            for (var c in checkSupply){
+                formattedString +=  ["<li>",checkSupply[c].ingredient, "||", checkSupply[c].quantity, checkSupply[c].measurement, "</li>"].join(" ")
+            }
+            formattedString += "</ul>"
+
+
 
             return formattedString
         }
 
+        function exportPDF() {
+            var d = new Date(); 
+		    var NoTimeDate = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); 
 
+            var pdfname = "MealPlan - " + NoTimeDate;
+            var pdftarget = '#mealWork_kanban';
+
+            kendo.drawing
+                .drawDOM(pdftarget, {
+                    paperSize: "auto",
+                    landscape: true,
+                    margin: {
+                        top: "10cm",
+                        bottom: "10cm",
+                        left: "10cm",
+                        right: "10cm"
+                    },
+                    scale: 1
+                })
+                .then(function(group) {
+                    kendo.drawing.pdf.saveAs(group, pdfname + ".pdf")
+                });
+        }
 
         
         $(document).ready(function () {
             initDatabase(function() {
-
-                // var proteinArray = [{ id: 0, name: "Soylent Green", image: "./images/common.png", common: true }]
-                var proteinArray = []
+                var proteinArray = [{ id: 0, name: "Soylent Green", image: "./images/common.png", common: true }]
                 for (var i in ingredientsDict){
                     if (ingredientsDict[i].type == "meat"){
                         if (findByMatchingProperties(proteinArray, {name: ingredientsDict[i].protein})){
@@ -174,6 +248,15 @@
                     { text: "Saturday", dataField: "sat", maxItems: 3, collapsible: false }
                 ];
             
+                //set up data for all meals lists
+                var fields = [
+                        { name: "id", type: "string" },
+                        { name: "status", map: "cuisine", type: "string" },
+                        { name: "text", type: "string" },
+                        { name: "tags", type: "string" },
+                        { name: "color", type: "string" },
+                        { name: "resourceId", type: "number" }
+                ];
                 //build meals from speadsheet database
                 var allMealsSource = []
                 var recipenames = Object.keys(recipes)
@@ -186,22 +269,24 @@
                             proteinID = proteinLookup[0].id
                         }
                     }
-
+                    
                     allMealsSource.push({
                         id: r,
-                        status: recipes[recipenames[r]].cuisine,
+                        cuisine: recipes[recipenames[r]].cuisine,
                         text: recipenames[r],
                         tags: recipes[recipenames[r]].meal.join(),
-                        color: "#5dc3f0",
+                        color: recipes[recipenames[r]].color,
                         resourceId: proteinID
                     })
                 }
+                var source =
+                {
+                    localData: allMealsSource,
+                    dataType: "array",
+                    dataFields: fields
+                };
+                var dataAdapter = new $.jqx.dataAdapter(source);
 
-                var kanbanSourceConnected2 = [];
-                var kanbanSourceConnected3 = [];
-                var kanbanSourceConnected4 = [];
-                var kanbanSourceConnected5 = [];
-                var kanbanSourceConnected6 = [];
     
     
                 var recipeTemplate = "<div class='jqx-kanban-item' id=''>"
@@ -218,9 +303,9 @@
                         $(element).find(".jqx-kanban-item-text").css('background', item.color);
                     },                    
                     width: '100%',
-                    height: 400,
+                    height: 'calc(100% - 485px)',
                     template: recipeTemplate,
-                    source: allMealsSource,
+                    source: dataAdapter,
                     connectWith: "#dinner_kanban, #lunch_kanban, #p_breakfast_kanban, #p_snack_kanban, #p_lunch_kanban",
                     columns: cuisineColumns,
                     resources: proteinArray,
@@ -230,7 +315,7 @@
                     width: '100%',
                     height: 155,
                     template: recipeTemplate,
-                    source: kanbanSourceConnected2,
+                    source: [],
                     connectWith: "#allMeals_kanban, #lunch_kanban, #p_breakfast_kanban, #p_snack_kanban, #p_lunch_kanban",
                     columns: dayColumns,
                     resources: proteinArray,
@@ -240,7 +325,7 @@
                     width: '100%',
                     height: 155,
                     template: recipeTemplate,
-                    source: kanbanSourceConnected3,
+                    source: [],
                     connectWith: "#allMeals_kanban, #dinner_kanban, #p_breakfast_kanban, #p_snack_kanban, #p_lunch_kanban",
                     columns: dayColumns,
                     resources: proteinArray,
@@ -250,7 +335,7 @@
                     width: '100%',
                     height: 72,
                     template: recipeTemplate,
-                    source: kanbanSourceConnected3,
+                    source: [],
                     connectWith: "#allMeals_kanban, #dinner_kanban, #lunch_kanban, #p_snack_kanban, #p_lunch_kanban",
                     columns: dayColumns,
                     resources: proteinArray,
@@ -260,7 +345,7 @@
                     width: '100%',
                     height: 52,
                     template: recipeTemplate,
-                    source: kanbanSourceConnected3,
+                    source: [],
                     connectWith: "#allMeals_kanban, #dinner_kanban, #lunch_kanban, #p_breakfast_kanban, #p_lunch_kanban",
                     columns: dayColumns,
                     resources: proteinArray,
@@ -270,7 +355,7 @@
                     width: '100%',
                     height: 52,
                     template: recipeTemplate,
-                    source: kanbanSourceConnected3,
+                    source: [],
                     connectWith: "#allMeals_kanban, #dinner_kanban, #lunch_kanban, #p_breakfast_kanban, #p_snack_kanban",
                     columns: dayColumns,
                     resources: proteinArray,
@@ -290,28 +375,17 @@
                         min: 384
                     }]
                 });
-                $("#horizontalSplitter").jqxSplitter({
-                    width: '100%',
-                    // $(window).height() - 128
-                    height: '100%',
-                    resizable: false,
-                    orientation: 'horizontal',
-                    panels: [{
-                        size: '100%',
-                        collapsible: false
-                    }, {
-                        size: 490,
-                        min: 490
-                    }]
+
+                $('#shoppingList').jqxEditor({
+                    width: "100%",
+                    height: 'calc(100% - 30px)',
+                    tools: 'bold italic underline | size | color | left center right | outdent indent | ul ol | clean'
                 });
 
-                $(document).ready(function () {
-                    $('#shoppingList').jqxEditor({
-                        width: "100%",
-                        height: "100%",
-                        tools: 'bold italic underline | size | color | left center right | outdent indent | ul ol | clean'
-                    });
-                });
+                $("#editDB").jqxButton({ width: "33.3%", height: 30 });
+                $("#exportPDF").jqxButton({ width: '33.3%', height: 30 });
+                $("#printList").jqxButton({ width: '33.3%', height: 30 });
+
 
 
                 //
@@ -324,6 +398,16 @@
                         var currentIngredientList = collectIngredientList()
                         $("#shoppingList").val(currentIngredientList)
                     }, 10);
+                });
+                $("#editDB").on('click', function (){
+                    var dbURL = 'https://docs.google.com/spreadsheets/d/1hS_7lFct6kUZv-HUwj50o-0guCED3opSgn4IERzbLf0/edit'
+                    window.open(dbURL, '_blank');
+                });
+                $("#exportPDF").on('click', function (){
+                    exportPDF()
+                });
+                $("#printList").on('click', function (){
+                    $('#shoppingList').jqxEditor('print')
                 });
 
 
@@ -340,10 +424,12 @@
 </head>
 <body>
     <div id="verticalSplitter">
-        <div style="overflow-y: auto;">
-            <div id="horizontalSplitter">
-                <div id="allMeals_kanban" style="float:left"></div>
+        <div>
+            <!-- <div id="horizontalSplitter"> -->
                 <div>
+                    <div id="allMeals_kanban" style="float:left"></div>
+                </div>
+                <div id="mealWork_kanban">
                     <div id="dinner_kanban"></div>
                     <div id="lunch_kanban"></div>
                     <div id="p_breakfast_kanban"></div>
@@ -352,13 +438,20 @@
 
                 </div>
 
-            </div>
+            <!-- </div> -->
         </div>
 
 
 
         <div style="overflow-y: auto;">
-            <textarea name="shoppingList" id="shoppingList" style="float: right"></textarea>
+            <div>
+                <textarea name="shoppingList" id="shoppingList" ></textarea>
+            </div>
+            <div id="buttonArea">
+                <input type="button" value="Edit Database" id='editDB' style="float:left"/>
+                <input type="button" value="Export Meal Plan" id='exportPDF' style="float: center" />
+                <input type="button" value="Print Shopping List" id='printList' style="float: right" />
+            </div>
         </div>
     </div>
 

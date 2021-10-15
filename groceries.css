@@ -1,18 +1,32 @@
-/* #p_breakfast_kanban-column-container-0 {
-    background-color: #afadad;
+#p_breakfast_kanban-column-container-0,
+#p_lunch_kanban-column-container-0,
+#p_snack_kanban-column-container-0,
+#p_breakfast_kanban-column-container-6,
+#p_lunch_kanban-column-container-6,
+#p_snack_kanban-column-container-6 {
+    background-color: #d9d9d9;
+    margin: 0px;
 }
-#p_lunch_kanban-column-container-0 {
-    background-color: #afadad;
+
+#allMeals_kanban{
+    width:100%;
+    height:100%;
 }
-#p_snack_kanban-column-container-0 {
-    background-color: #afadad;
-} */
 
-
+#mealWork_kanban {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+}
+#buttonArea {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+}
 
 .jqx-kanban-item-color-status {
     width: 100%;
-    height: 25px;
+    height: 100%;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     position: relative;
@@ -30,7 +44,7 @@
 
 .jqx-kanban-item-avatar {
     margin-top: 5px;
-    border: 1px solid black;
+    border: 2px solid #2e2e2e;
 }
 .jqx-kanban-item-leftover {
     margin-top: 5px;

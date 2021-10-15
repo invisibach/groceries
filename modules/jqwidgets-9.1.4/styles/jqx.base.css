@@ -6699,7 +6699,7 @@ ol li .jqx-listmenu-item-label:before {
     margin: 2px;
     /* padding-top: 5px;
     padding-bottom: 5px; */
-    border-width: 1px;
+    /* border-width: 1px; */
     border-style: solid;
     border-color: inherit;
     position: relative;
