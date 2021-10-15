@@ -140,51 +140,53 @@
         }
 
         function textFormat(list){
-            var formattedDict = {}
-            var checkSupply = []
-            for(var i in list){
-                if (list[i].have !== ""){
-                    checkSupply.push(list[i])
-                } else {
-                    if(list[i].store in formattedDict){
-                        if (list[i].isle in formattedDict[list[i].store]){
-                            formattedDict[list[i].store][list[i].isle].push(list[i])
+            var formattedString = ""
+            if (list.length > 0){
+                var formattedDict = {}
+                var checkSupply = []
+                for(var i in list){
+                    if (list[i].have !== ""){
+                        checkSupply.push(list[i])
+                    } else {
+                        if(list[i].store in formattedDict){
+                            if (list[i].isle in formattedDict[list[i].store]){
+                                formattedDict[list[i].store][list[i].isle].push(list[i])
+                            } else {
+                                formattedDict[list[i].store][list[i].isle] = [list[i]]
+                            }
                         } else {
+                            formattedDict[list[i].store] = {}
                             formattedDict[list[i].store][list[i].isle] = [list[i]]
                         }
-                    } else {
-                        formattedDict[list[i].store] = {}
-                        formattedDict[list[i].store][list[i].isle] = [list[i]]
                     }
                 }
-            }
-            
-            
-            var formattedString = ""
-            for (var s in formattedDict){
-                //add store name
-                formattedString += "<div style='text-align: left;''><span style='font-weight: bold; font-size: medium;'>" + s + ":</span></div><ul>"
-                for (var i in formattedDict[s]){
-                    //add isle name
-                    formattedString += "<li>" + i + "<br></li><ul>"
-                        for (var f=0; f<formattedDict[s][i].length; f++){
-                            var slIng = formattedDict[s][i][f]
-                            formattedString += ["<li>",slIng.ingredient, "||", slIng.quantity, slIng.measurement, "</li>"].join(" ")
-                        }
-                    formattedString += "</ul>"
-                    // formattedString += "</ul>"
+                
+                
+                for (var s in formattedDict){
+                    //add store name
+                    formattedString += "<div style='text-align: left;''><span style='font-weight: bold; font-size: medium;'>" + s + ":</span></div><ul>"
+                    for (var i in formattedDict[s]){
+                        //add isle name
+                        formattedString += "<li>" + i + "<br></li><ul>"
+                            for (var f=0; f<formattedDict[s][i].length; f++){
+                                var slIng = formattedDict[s][i][f]
+                                formattedString += ["<li>",slIng.ingredient, "-","<span style='font-style: italic;'>", slIng.quantity, slIng.measurement,"</span></li>"].join(" ")
+                            }
+                        formattedString += "</ul>"
+                        // formattedString += "</ul>"
+                    }
+                    formattedString += "</ul><div><br></div>"
                 }
-                formattedString += "</ul><div><br></div>"
+                //append supply check items
+                formattedString += "<div style='text-align: left;''><span style='font-weight: bold; font-size: medium;'>Check Existing Supply:</span></div><ul>"
+                for (var c in checkSupply){
+                    formattedString +=  ["<li>",checkSupply[c].ingredient, "-", checkSupply[c].quantity, checkSupply[c].measurement, "</li>"].join(" ")
+                }
+                formattedString += "</ul>"
+      
+    
+                
             }
-            //append supply check items
-            formattedString += "<div style='text-align: left;''><span style='font-weight: bold; font-size: medium;'>Check Existing Supply:</span></div><ul>"
-            for (var c in checkSupply){
-                formattedString +=  ["<li>",checkSupply[c].ingredient, "||", checkSupply[c].quantity, checkSupply[c].measurement, "</li>"].join(" ")
-            }
-            formattedString += "</ul>"
-
-
-
             return formattedString
         }
 
