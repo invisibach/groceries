@@ -47,7 +47,7 @@
             var source =
              {
                  localData: [
-                          { id: "1161", state: "new", label: "Make a new Dashboard", tags: "dashboard", hex: "#000000", resourceId: 3 },
+                          { id: "1161", state: "new", label: "Make a new Dashboard", tags: "dashboard", hex: "#36c7d0", resourceId: 3 },
                           { id: "1645", state: "work", label: "Prepare new release", tags: "release", hex: "#ff7878", resourceId: 1 },
                           { id: "9213", state: "new", label: "One item added to the cart", tags: "cart", hex: "#96c443", resourceId: 3 },
                           { id: "6546", state: "done", label: "Edit Item Price", tags: "price, edit", hex: "#ff7878", resourceId: 4 },
@@ -113,6 +113,39 @@
                 // render items.
                 itemRenderer: function(element, item, resource)
                 {
+                    // $(element).find(".jqx-kanban-item-color-status").html("<span style='line-height: 23px; margin-left: 5px;'>" + resource.name + "</span>");
+                    // $(element).find(".jqx-kanban-item-text").css('background', item.color);
+                },
+                columns: [
+                    { text: "Backlog", iconClassName: getIconClassName(), dataField: "new", maxItems: 4 },
+                    { text: "In Progress", iconClassName: getIconClassName(), dataField: "work", maxItems: 2 },
+                    { text: "Done", iconClassName: getIconClassName(), dataField: "done", maxItems: 5 }
+                ],
+                // render column headers.
+                columnRenderer: function (element, collapsedElement, column) {
+                    var columnItems = $("#kanban").jqxKanban('getColumnItems', column.dataField).length;
+                    // update header's status.
+                    element.find(".jqx-kanban-column-header-status").html(" (" + columnItems + "/" + column.maxItems + ")");
+                    // update collapsed header's status.
+                    collapsedElement.find(".jqx-kanban-column-header-status").html(" (" + columnItems + "/" + column.maxItems + ")");
+                },
+                connectWith: "#kanban2"
+            });
+            
+            $('#kanban2').jqxKanban({
+                width: getWidth('kanban'),
+                template: "<div class='jqx-kanban-item' id=''>"
+                        + "<div class='jqx-kanban-item-color-status'></div>"
+                        + "<div style='display: none;' class='jqx-kanban-item-avatar'></div>"
+                        + "<div class='jqx-icon jqx-icon-close jqx-kanban-item-template-content jqx-kanban-template-icon'></div>"
+                        + "<div class='jqx-kanban-item-text'></div>"
+                        + "<div style='display: none;' class='jqx-kanban-item-footer'></div>"
+                + "</div>",
+                resources: resourcesAdapterFunc(),
+                source: [],
+                // render items.
+                itemRenderer: function(element, item, resource)
+                {
                     $(element).find(".jqx-kanban-item-color-status").html("<span style='line-height: 23px; margin-left: 5px;'>" + resource.name + "</span>");
                     $(element).find(".jqx-kanban-item-text").css('background', item.color);
                 },
@@ -170,5 +203,6 @@
 </head>
 <body>
       <div id="kanban"></div>     
+      <div id="kanban2"></div>     
 </body>
 </html>

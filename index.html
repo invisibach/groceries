@@ -1,7 +1,7 @@
 <html>
 
     <head>
-        <Title>TY Meal Planner 2000</Title>
+        <Title>TY Meal Planner</Title>
         <link type="text/css" rel="stylesheet" href="./groceries.css" />
         <link type="text/css" rel="stylesheet" href="./modules/jqwidgets-9.1.4/styles/jqx.base.css" />
         <script type="text/javascript" src="./modules/papaparse/papaparse.min.js"></script>
@@ -29,7 +29,6 @@
         function getMealColor(dish){
             var color = colors["white"]
             var meals = dish.meal.replace(" ","").split(",")
-            console.log(meals)
             if (meals.length == 1) {
                 if (meals.includes("breakfast")){
                     color = colors["red"]
@@ -217,7 +216,7 @@
         
         $(document).ready(function () {
             initDatabase(function() {
-                var proteinArray = [{ id: 0, name: "Soylent Green", image: "./images/common.png", common: true }]
+                var proteinArray = [{ id: 0, name: "takeout", image: "./images/takeout.png", common: true }]
                 for (var i in ingredientsDict){
                     if (ingredientsDict[i].type == "meat"){
                         if (findByMatchingProperties(proteinArray, {name: ingredientsDict[i].protein})){
@@ -235,7 +234,8 @@
                     if (findByMatchingProperties(cuisineColumns, {text: recipes[r].cuisine}) < 1){
                         cuisineColumns.push({
                             text: recipes[r].cuisine,
-                            dataField: recipes[r].cuisine
+                            dataField: recipes[r].cuisine,
+                            iconClassName: "jqx-icon-plus-alt"
                         })
                     }
                 }
@@ -253,7 +253,7 @@
                 //set up data for all meals lists
                 var fields = [
                         { name: "id", type: "string" },
-                        { name: "status", map: "cuisine", type: "string" },
+                        { name: "status", type: "string" },
                         { name: "text", type: "string" },
                         { name: "tags", type: "string" },
                         { name: "color", type: "string" },
@@ -274,22 +274,27 @@
                     
                     allMealsSource.push({
                         id: r,
-                        cuisine: recipes[recipenames[r]].cuisine,
+                        status: recipes[recipenames[r]].cuisine,
                         text: recipenames[r],
                         tags: recipes[recipenames[r]].meal.join(),
                         color: recipes[recipenames[r]].color,
                         resourceId: proteinID
                     })
                 }
-                var source =
-                {
+                var source = {
                     localData: allMealsSource,
                     dataType: "array",
                     dataFields: fields
                 };
                 var dataAdapter = new $.jqx.dataAdapter(source);
 
-    
+                var blanksource = {
+                    localData: [],
+                    dataType: "array",
+                    dataFields: fields
+                }
+                var blankDataAdapter = new $.jqx.dataAdapter(blanksource);
+   
     
                 var recipeTemplate = "<div class='jqx-kanban-item' id=''>"
                         + "<div class='jqx-kanban-item-color-status'></div>"
@@ -397,6 +402,10 @@
                 //trigger on meal move
                 $("[id$=kanban]").on('itemMoved', function (event) {
                     setTimeout(function() {
+                        var args = event.args
+                        console.log("#"+ args.newParentId + "_" + args.itemId)
+                        $("#"+ args.newParentId + "_" + args.itemId).css('background', args.itemData.color)
+
                         var currentIngredientList = collectIngredientList()
                         $("#shoppingList").val(currentIngredientList)
                     }, 10);
@@ -413,11 +422,38 @@
                 });
 
 
-                //basis for leftover duplication
-                $('#allMeals_kanban').on("itemAttrClicked", function (event) {
+                //add bonus meals
+                var itemIndex = 0;
+                $('#allMeals_kanban').on('columnAttrClicked', function (event) {
                     var args = event.args;
-                    if (args.attribute == "template") {
-                        $('#allMeals_kanban').jqxKanban('removeItem', args.item.id);
+                    if (args.attribute == "button") {
+                        args.cancelToggle = true;
+                        if (!args.column.collapsed) {
+                            $('#allMeals_kanban').jqxKanban('addItem', { 
+                                status: args.column.dataField, 
+                                text: "<input placeholder='(No Title)' style='width: 96%; margin-top:2px; border-radius: 3px; border-color: #ddd; line-height:20px; height: 20px;' class='jqx-input' id='newItem" + itemIndex + "' value=''/>", 
+                                tags: "new task", 
+                                color: colors["white"], 
+                                resourceId: 0 
+                            });
+                            var input =  $("#newItem" + itemIndex);
+                            input.mousedown(function (event) {
+                                event.stopPropagation();
+                            });
+                            input.mouseup(function (event) {
+                                event.stopPropagation();
+                            });
+                            input.keydown(function (event) {
+                                if (event.keyCode == 13) {
+                                    if (event.target.value !== ""){
+                                        $("<span>" + $(event.target).val() + "</span>").insertBefore($(event.target));
+                                        $(event.target).remove();
+                                    }
+                                }
+                            });
+                            input.focus();
+                            itemIndex++;
+                        }
                     }
                 });
             });
@@ -452,7 +488,7 @@
             <div id="buttonArea">
                 <input type="button" value="Edit Database" id='editDB' style="float:left"/>
                 <input type="button" value="Export Meal Plan" id='exportPDF' style="float: center" />
-                <input type="button" value="Print Shopping List" id='printList' style="float: right" />
+                <input type="button" value="Print List" id='printList' style="float: right" />
             </div>
         </div>
     </div>
