@@ -19,13 +19,13 @@
 
     <script>
         let colors = {
-            "red": "#F65A38",
-            "orange": "#F8961E",
-            "yellow":"#F9C74F",
-            "green": "#90BE6D",
-            "blue": "#43AA8B",
-            "purple": "#577590",
-            "white": "#eeeeee"
+            "red": "#FCBA04",
+            "orange": "#C2B95D",
+            "yellow":"#88B7B5",
+            "green": "#8D99AE",
+            "blue": "#494B6F",
+            "purple": "#947423",
+            "white": "#EDF2F4"
         }
 
         function getMealColor(dish){
@@ -63,7 +63,7 @@
                 header: true,
                 complete: function(results) {
                     var recipelines = results.data
-
+                    
                     for (var r=0; r<recipelines.length; r++){
                         //split recipes from ingredients
                         if(recipelines[r].ingredients !== ""){
@@ -171,6 +171,7 @@
                         formattedString += "<li>" + i + "<br></li><ul>"
                             for (var f=0; f<formattedDict[s][i].length; f++){
                                 var slIng = formattedDict[s][i][f]
+                                
                                 formattedString += ["<li>",slIng.ingredient, "-","<span style='font-style: italic;'>", slIng.quantity, slIng.measurement,"</span></li>"].join(" ")
                             }
                         formattedString += "</ul>"
@@ -220,7 +221,7 @@
             initDatabase(function() {
                 var proteinArray = [{ id: 0, name: "takeout", image: "./images/takeout.png", common: true }]
                 for (var i in ingredientsDict){
-                    if (ingredientsDict[i].type == "meat"){
+                    if (ingredientsDict[i].protein !== ""){
                         if (findByMatchingProperties(proteinArray, {name: ingredientsDict[i].protein})){
                             proteinArray.push({
                                 id: proteinArray.length,
@@ -405,10 +406,10 @@
                 $("[id$=kanban]").on('itemMoved', function (event) {
                     setTimeout(function() {
                         var args = event.args
-                        console.log("#"+ args.newParentId + "_" + args.itemId)
                         $("#"+ args.newParentId + "_" + args.itemId).css('background', args.itemData.color)
 
                         var currentIngredientList = collectIngredientList()
+                        
                         $("#shoppingList").val(currentIngredientList)
                     }, 10);
                 });
