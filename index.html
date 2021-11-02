@@ -118,7 +118,11 @@
             }
             for (var n in mealnames){
                 for (var i in recipes[mealnames[n]].ingredients){
+                    
                     var thisIngredient = recipes[mealnames[n]].ingredients[i]
+                    if (isNaN(thisIngredient.quantity)){
+                        thisIngredient.quantity = 1
+                    }
                     // check if ingredient already in list
                     var index = mealIngredientsList.findIndex(function(ing) {
                         return ing.ingredient == thisIngredient.ingredient
@@ -252,6 +256,15 @@
                     { text: "Friday", dataField: "fri", maxItems: 3, collapsible: false },
                     { text: "Saturday", dataField: "sat", maxItems: 3, collapsible: false }
                 ];
+                var pDayColumns = [
+                    { text: "Sunday", dataField: "sun", maxItems: 0, collapsible: false },
+                    { text: "Monday", dataField: "mon", maxItems: 1, collapsible: false },
+                    { text: "Tuesday", dataField: "tue", maxItems: 1, collapsible: false },
+                    { text: "Wednesday", dataField: "wed", maxItems: 1, collapsible: false },
+                    { text: "Thursday", dataField: "thu", maxItems: 1, collapsible: false },
+                    { text: "Friday", dataField: "fri", maxItems: 1, collapsible: false },
+                    { text: "Saturday", dataField: "sat", maxItems: 0, collapsible: false }
+                ];
             
                 //set up data for all meals lists
                 var fields = [
@@ -299,11 +312,11 @@
                 var blankDataAdapter = new $.jqx.dataAdapter(blanksource);
    
     
-                var recipeTemplate = "<div class='jqx-kanban-item' id=''>"
+                var recipeTemplate = "<div class='jqx-kanban-item' id='' style='height:35px'>"
                         + "<div class='jqx-kanban-item-color-status'></div>"
                         + "<div class='jqx-kanban-item-avatar'></div>"
                         // + "<div class='jqx-icon jqx-icon-close jqx-kanban-item-template-content jqx-kanban-template-icon'></div>"
-                        + "<div class='jqx-kanban-item-text'></div>"
+                        + "<div class='jqx-kanban-item-text' style='height:20px'></div>"
                         + "<div style='display: none;' class='jqx-kanban-item-footer'></div>"
                         + "</div>"
 
@@ -323,7 +336,7 @@
                 });
                 $('#dinner_kanban').jqxKanban({
                     width: '100%',
-                    height: 155,
+                    height: 153,
                     template: recipeTemplate,
                     source: [],
                     connectWith: "#allMeals_kanban, #lunch_kanban, #p_breakfast_kanban, #p_snack_kanban, #p_lunch_kanban",
@@ -333,7 +346,7 @@
                 });
                 $('#lunch_kanban').jqxKanban({
                     width: '100%',
-                    height: 155,
+                    height: 153,
                     template: recipeTemplate,
                     source: [],
                     connectWith: "#allMeals_kanban, #dinner_kanban, #p_breakfast_kanban, #p_snack_kanban, #p_lunch_kanban",
@@ -343,46 +356,59 @@
                 });
                 $('#p_breakfast_kanban').jqxKanban({
                     width: '100%',
-                    height: 72,
+                    height: 71,
                     template: recipeTemplate,
                     source: [],
                     connectWith: "#allMeals_kanban, #dinner_kanban, #lunch_kanban, #p_snack_kanban, #p_lunch_kanban",
-                    columns: dayColumns,
+                    columns: pDayColumns,
                     resources: proteinArray,
                     headerHeight: 20
                 });
                 $('#p_snack_kanban').jqxKanban({
                     width: '100%',
-                    height: 52,
+                    height: 51,
                     template: recipeTemplate,
                     source: [],
                     connectWith: "#allMeals_kanban, #dinner_kanban, #lunch_kanban, #p_breakfast_kanban, #p_lunch_kanban",
-                    columns: dayColumns,
+                    columns: pDayColumns,
                     resources: proteinArray,
                     headerHeight: 0
                 });
                 $('#p_lunch_kanban').jqxKanban({
                     width: '100%',
-                    height: 52,
+                    height: 51,
                     template: recipeTemplate,
                     source: [],
                     connectWith: "#allMeals_kanban, #dinner_kanban, #lunch_kanban, #p_breakfast_kanban, #p_snack_kanban",
-                    columns: dayColumns,
+                    columns: pDayColumns,
                     resources: proteinArray,
                     headerHeight: 0
                 });
 
-                $("#verticalSplitter").jqxSplitter({
+                $("#verticalSplitterRight").jqxSplitter({
                     width: '100%',
-                    // $(window).height() - 128
                     height: 'calc(100% - 2px)',
                     resizable: false,
+                    splitBarSize: 0,
                     panels: [{
                         size: '100%',
                         collapsible: false
                     }, {
                         size: 384,
                         min: 384
+                    }]
+                });
+                $("#verticalSplitterLeft").jqxSplitter({
+                    width: '100%',
+                    height: 'calc(100% - 2px)',
+                    resizable: false,
+                    splitBarSize: 0,
+                    panels: [{
+                        size: 15,
+                        min: 15
+                    }, {
+                        size: '100%',
+                        collapsible: false
                     }]
                 });
 
@@ -464,36 +490,58 @@
     </script>
 </head>
 <body>
-    <div id="verticalSplitter">
-        <div>
-            <!-- <div id="horizontalSplitter"> -->
-                <div>
-                    <div id="allMeals_kanban" style="float:left"></div>
-                </div>
-                <div id="mealWork_kanban">
-                    <div id="dinner_kanban"></div>
-                    <div id="lunch_kanban"></div>
-                    <div id="p_breakfast_kanban"></div>
-                    <div id="p_snack_kanban"></div>
-                    <div id="p_lunch_kanban"></div>
 
-                </div>
-
-            <!-- </div> -->
-        </div>
-
-
-
-        <div style="overflow-y: auto;">
+    <div>
+        <div id="verticalSplitterRight">
             <div>
-                <textarea name="shoppingList" id="shoppingList" ></textarea>
+                <!-- <div id="horizontalSplitter"> -->
+                    <div>
+                        <div id="allMeals_kanban" style="float:left"></div>
+                    </div>
+                    <div id="verticalSplitterLeft">
+                        <div>
+                            <div style="writing-mode: vertical-rl; text-orientation: mixed; width:15px;">
+                                <div id="labelSpacer"></div>
+                                <div id="bigLabel">Lunch</div>
+                                <div id="labelSpacer"></div>
+                                <div id="bigLabel">Dinner</div>
+                                <div id="labelSpacer" style="font-weight: bold; text-align: center;">P</div>
+                                <div id="smLabel">B-fast</div>
+                                <div id="smLabel">Snack</div>
+                                <div id="smLabel">Lunch</div>
+                            </div>
+                        </div>
+                            <div id="mealWork_kanban">
+                                <div id="dinner_kanban"></div>
+                                <div id="lunch_kanban"></div>
+                                <div id="p_breakfast_kanban"></div>
+                                <div id="p_snack_kanban"></div>
+                                <div id="p_lunch_kanban"></div>
+        
+                            </div>
+                        </div>
+
+
+
+
+
+                <!-- </div> -->
             </div>
-            <div id="buttonArea">
-                <input type="button" value="Edit Database" id='editDB' style="float:left"/>
-                <input type="button" value="Export Meal Plan" id='exportPDF' style="float: center" />
-                <input type="button" value="Print List" id='printList' style="float: right" />
+
+
+
+            <div style="overflow-y: auto;">
+                <div>
+                    <textarea name="shoppingList" id="shoppingList" ></textarea>
+                </div>
+                <div id="buttonArea">
+                    <input type="button" value="Edit Database" id='editDB' style="float:left"/>
+                    <input type="button" value="Export Meal Plan" id='exportPDF' style="float: center" />
+                    <input type="button" value="Print List" id='printList' style="float: right" />
+                </div>
             </div>
         </div>
+
     </div>
 
 </body>

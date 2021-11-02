@@ -40,7 +40,7 @@
 }
 
 .jqx-kanban-item-text {
-    padding-top: 6px;
+    padding-top: 3px;
 }
 
 .jqx-kanban-item-avatar {
@@ -73,3 +73,23 @@
     border-color: #c53030;
 }
 
+#labelSpacer{
+    float: left;
+    height: 21px;
+    width: 13px;
+    border: solid #eaeaea 1px;
+    background-color: #f8f8f8;
+}
+
+#bigLabel{
+    float:left; 
+    height:128px; 
+    border:solid #eaeaea 1px;
+    border-bottom: solid black 1px;
+}
+#smLabel{
+    float:left; 
+    height:48px; 
+    border:solid #eaeaea 1px;
+    border-bottom: solid black 1px;
+}
