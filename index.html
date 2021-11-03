@@ -19,12 +19,12 @@
 
     <script>
         let colors = {
-            "red": "#FCBA04",
-            "orange": "#C2B95D",
-            "yellow":"#88B7B5",
-            "green": "#8D99AE",
-            "blue": "#494B6F",
-            "purple": "#947423",
+            "red": "#C7675D",
+            "orange": "#DFBA7C",
+            "yellow":"#DDF3D8",
+            "green": "#A7D0C9",
+            "blue": "#3EA6C0",
+            "purple": "#C3A8A8",
             "white": "#EDF2F4"
         }
 
@@ -404,8 +404,8 @@
                     resizable: false,
                     splitBarSize: 0,
                     panels: [{
-                        size: 15,
-                        min: 15
+                        size: 12,
+                        min: 12
                     }, {
                         size: '100%',
                         collapsible: false
@@ -432,6 +432,7 @@
                 $("[id$=kanban]").on('itemMoved', function (event) {
                     setTimeout(function() {
                         var args = event.args
+                        console.log()
                         $("#"+ args.newParentId + "_" + args.itemId).css('background', args.itemData.color)
 
                         var currentIngredientList = collectIngredientList()
@@ -462,7 +463,7 @@
                                 status: args.column.dataField, 
                                 text: "<input placeholder='(No Title)' style='width: 96%; margin-top:2px; border-radius: 3px; border-color: #ddd; line-height:20px; height: 20px;' class='jqx-input' id='newItem" + itemIndex + "' value=''/>", 
                                 tags: "new task", 
-                                color: colors["white"], 
+                                color: colors["red"], 
                                 resourceId: 0 
                             });
                             var input =  $("#newItem" + itemIndex);
@@ -492,56 +493,52 @@
 <body>
 
     <div>
-        <div id="verticalSplitterRight">
+        <div id="verticalSplitterLeft">
+            <div style="writing-mode: vertical-rl; text-orientation: mixed; line-height: 10px;">
+                <!-- <div id="labelSpacer"></div>
+                <div id="hugeLabel"></div> -->
+                <div id="mealWork_kanban">
+                    <div id="labelSpacer"></div>
+                    <div id="bigLabel">Lunch</div>
+                    <div id="labelSpacer"></div>
+                    <div id="bigLabel">Dinner</div>
+                    <div id="labelSpacer" style="font-weight: bold; text-align: center;">P</div>
+                    <div id="smLabel">B-fast</div>
+                    <div id="smLabel">Snack</div>
+                    <div id="smLabel">Lunch</div>
+                </div>
+            </div>
             <div>
-                <!-- <div id="horizontalSplitter"> -->
+                <div id="verticalSplitterRight">
                     <div>
-                        <div id="allMeals_kanban" style="float:left"></div>
-                    </div>
-                    <div id="verticalSplitterLeft">
                         <div>
-                            <div style="writing-mode: vertical-rl; text-orientation: mixed; width:15px;">
-                                <div id="labelSpacer"></div>
-                                <div id="bigLabel">Lunch</div>
-                                <div id="labelSpacer"></div>
-                                <div id="bigLabel">Dinner</div>
-                                <div id="labelSpacer" style="font-weight: bold; text-align: center;">P</div>
-                                <div id="smLabel">B-fast</div>
-                                <div id="smLabel">Snack</div>
-                                <div id="smLabel">Lunch</div>
-                            </div>
+                            <div id="allMeals_kanban" style="float:left"></div>
                         </div>
+                        <div>
                             <div id="mealWork_kanban">
                                 <div id="dinner_kanban"></div>
                                 <div id="lunch_kanban"></div>
                                 <div id="p_breakfast_kanban"></div>
                                 <div id="p_snack_kanban"></div>
                                 <div id="p_lunch_kanban"></div>
-        
+    
                             </div>
                         </div>
-
-
-
-
-
-                <!-- </div> -->
-            </div>
-
-
-
-            <div style="overflow-y: auto;">
-                <div>
-                    <textarea name="shoppingList" id="shoppingList" ></textarea>
-                </div>
-                <div id="buttonArea">
-                    <input type="button" value="Edit Database" id='editDB' style="float:left"/>
-                    <input type="button" value="Export Meal Plan" id='exportPDF' style="float: center" />
-                    <input type="button" value="Print List" id='printList' style="float: right" />
+                    </div>
+    
+                    <div style="overflow-y: auto;">
+                        <div>
+                            <textarea name="shoppingList" id="shoppingList" ></textarea>
+                        </div>
+                        <div id="buttonArea">
+                            <input type="button" value="Edit Database" id='editDB' style="float:left"/>
+                            <input type="button" value="Export Meal Plan" id='exportPDF' style="float: center" />
+                            <input type="button" value="Print List" id='printList' style="float: right" />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
 
 </body>

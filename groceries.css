@@ -81,6 +81,12 @@
     background-color: #f8f8f8;
 }
 
+#hugeLabel{
+    float:left; 
+    height:128px; 
+    border:solid #eaeaea 1px;
+    border-bottom: solid black 1px;
+}
 #bigLabel{
     float:left; 
     height:128px; 
