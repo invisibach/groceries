@@ -326,7 +326,7 @@
                         $(element).find(".jqx-kanban-item-text").css('background', item.color);
                     },                    
                     width: '100%',
-                    height: 'calc(100% - 485px)',
+                    height: 'calc(100% - 479px)',
                     template: recipeTemplate,
                     source: dataAdapter,
                     connectWith: "#dinner_kanban, #lunch_kanban, #p_breakfast_kanban, #p_snack_kanban, #p_lunch_kanban",
@@ -498,12 +498,12 @@
                 <!-- <div id="labelSpacer"></div>
                 <div id="hugeLabel"></div> -->
                 <div id="mealWork_kanban">
-                    <div id="labelSpacer"></div>
+                    <div id="labelSpacer" style="border-top: solid black 1.5px"></div>
                     <div id="bigLabel">Lunch</div>
                     <div id="labelSpacer"></div>
                     <div id="bigLabel">Dinner</div>
                     <div id="labelSpacer" style="font-weight: bold; text-align: center;">P</div>
-                    <div id="smLabel">B-fast</div>
+                    <div id="smLabel" style="height:46px">B-fast</div>
                     <div id="smLabel">Snack</div>
                     <div id="smLabel">Lunch</div>
                 </div>

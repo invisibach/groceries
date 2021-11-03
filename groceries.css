@@ -75,7 +75,7 @@
 
 #labelSpacer{
     float: left;
-    height: 21px;
+    height: 22px;
     width: 13px;
     border: solid #eaeaea 1px;
     background-color: #f8f8f8;
@@ -86,16 +86,19 @@
     height:128px; 
     border:solid #eaeaea 1px;
     border-bottom: solid black 1px;
+    background: #ffffff;
 }
 #bigLabel{
     float:left; 
-    height:128px; 
+    height:127px; 
     border:solid #eaeaea 1px;
     border-bottom: solid black 1px;
+    background: #ffffff;
 }
 #smLabel{
     float:left; 
-    height:48px; 
+    height:49px; 
     border:solid #eaeaea 1px;
     border-bottom: solid black 1px;
+    background: #ffffff;
 }
